@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Sacos por Quilo - Maria Embalagens</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: transparent; color: #333; }
+
+.calc-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 15px;
+}
+
+.calc-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.calc-header h1 {
+    font-size: 26px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.calc-header p {
+    font-size: 14px;
+    color: #777;
+}
+
+/* Abas */
+.calc-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+}
+
+.calc-tab {
+    flex: 1;
+    padding: 14px 10px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: 2px solid #ddd;
+    border-bottom: none;
+    background: #f0f0f0;
+    color: #999;
+    transition: all 0.3s ease;
+    border-radius: 10px 10px 0 0;
+    position: relative;
+}
+
+.calc-tab.active {
+    background: #fff;
+    color: #eb268f;
+    border-color: #eb268f;
+    z-index: 1;
+}
+
+.calc-tab:hover:not(.active) {
+    background: #e8e8e8;
+    color: #666;
+}
+
+/* Painel */
+.calc-panel {
+    display: none;
+    background: #fff;
+    border: 2px solid #eb268f;
+    border-radius: 0 0 12px 12px;
+    padding: 25px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.calc-panel.active {
+    display: block;
+}
+
+/* Formulário */
+.calc-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.calc-field {
+    flex: 1;
+    min-width: 100px;
+}
+
+.calc-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.calc-field input,
+.calc-field select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    transition: border-color 0.3s;
+    background: #fafafa;
+    -webkit-appearance: none;
+}
+
+.calc-field input:focus,
+.calc-field select:focus {
+    outline: none;
+    border-color: #eb268f;
+    background: #fff;
+}
+
+.calc-field input::placeholder {
+    color: #bbb;
+    font-weight: 400;
+}
+
+.calc-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ccc;
+    padding-bottom: 0;
+    min-width: 20px;
+    padding-top: 22px;
+}
+
+.calc-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    background: #eb268f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(235,38,143,0.3);
+}
+
+.calc-btn:hover {
+    background: #d81e7f;
+    box-shadow: 0 6px 20px rgba(235,38,143,0.45);
+    transform: translateY(-1px);
+}
+
+.calc-btn:active {
+    transform: translateY(0);
+}
+
+/* Resultado */
+.calc-result {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid #eb268f;
+}
+
+.calc-result.show {
+    display: block;
+    animation: fadeInResult 0.4s ease;
+}
+
+@keyframes fadeInResult {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.calc-result-label {
+    font-size: 13px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.calc-result-value {
+    font-size: 42px;
+    font-weight: 800;
+    color: #eb268f;
+    line-height: 1.2;
+}
+
+.calc-result-unit {
+    font-size: 16px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.calc-result-detail {
+    font-size: 13px;
+    color: #999;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(235,38,143,0.2);
+}
+
+.calc-result-detail span {
+    font-weight: 600;
+    color: #666;
+}
+
+/* Tabela de referência */
+.calc-ref {
+    margin-top: 25px;
+}
+
+.calc-ref h3 {
+    font-size: 14px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.calc-ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.calc-ref-table th {
+    background: #eb268f;
+    color: #fff;
+    padding: 10px 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.calc-ref-table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.calc-ref-table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.calc-ref-table td {
+    padding: 9px 8px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.calc-ref-table tr:hover td {
+    background: #fce4ec;
+}
+
+.calc-ref-table tr:last-child td:first-child {
+    border-radius: 0 0 0 8px;
+}
+
+.calc-ref-table tr:last-child td:last-child {
+    border-radius: 0 0 8px 0;
+}
+
+.calc-ref-table .qtde-destaque {
+    font-weight: 700;
+    color: #eb268f;
+}
+
+/* Info sacola feira */
+.calc-info {
+    background: #fff3e0;
+    border-left: 3px solid #ff9800;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: #666;
+}
+
+.calc-info strong {
+    color: #e65100;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+    .calc-container { padding: 0 10px; margin: 10px auto; }
+    .calc-header h1 { font-size: 20px; }
+    .calc-form { gap: 10px; }
+    .calc-field { min-width: 70px; }
+    .calc-field input, .calc-field select { padding: 10px; font-size: 15px; }
+    .calc-separator { font-size: 18px; padding-top: 20px; }
+    .calc-result-value { font-size: 34px; }
+    .calc-tab { font-size: 11px; padding: 10px 6px; }
+    .calc-panel { padding: 20px 15px; }
+}
+</style>
+</head>
+<body>
+
+<div class="calc-container">
+
+    <div class="calc-header">
+        <h1>Calculadora de Sacos por Quilo</h1>
+        <p>Descubra quantos sacos vem em 1 kg conforme o tamanho e espessura</p>
+    </div>
+
+    <!-- Abas -->
+    <div class="calc-tabs">
+        <div class="calc-tab active" onclick="trocarAba('cristal')">Saco Cristal / PP</div>
+        <div class="calc-tab" onclick="trocarAba('feira')">Sacola Feira</div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ABA 1: SACO CRISTAL / PP                     -->
+    <!-- ============================================ -->
+    <div id="painel-cristal" class="calc-panel active">
+
+        <div class="calc-form">
+            <div class="calc-field">
+                <label>Largura (cm)</label>
+                <input type="number" id="cristal-largura" placeholder="Ex: 20" min="1" max="200" inputmode="numeric">
+            </div>
+            <div class="calc-separator">&times;</div>
+            <div class="calc-field">
+                <label>Altura (cm)</label>
+                <input type="number" id="cristal-altura" placeholder="Ex: 30" min="1" max="200" inputmode="numeric">
+            </div>
+            <div class="calc-separator">&times;</div>
+            <div class="calc-field">
+                <label>Espessura</label>
+                <select id="cristal-espessura">
+                    <option value="6">6 micras (0,06)</option>
+                    <option value="10">10 micras (0,10)</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="calc-btn" onclick="calcularCristal()">Calcular</button>
+
+        <div id="resultado-cristal" class="calc-result">
+            <div class="calc-result-label">Quantidade por quilo</div>
+            <div class="calc-result-value" id="cristal-qtde">0</div>
+            <div class="calc-result-unit">sacos por kg</div>
+            <div class="calc-result-detail">
+                Tamanho: <span id="cristal-tamanho">-</span> |
+                Espessura: <span id="cristal-esp-info">-</span> |
+                Peso unitário: <span id="cristal-peso">-</span>
+            </div>
+        </div>
+
+        <div class="calc-ref">
+            <h3>Tabela de Referência Rápida</h3>
+            <table class="calc-ref-table">
+                <thead>
+                    <tr>
+                        <th>Tamanho</th>
+                        <th>Espessura</th>
+                        <th>Qtde/Kg</th>
+                        <th>Uso Comum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>8 x 24</td><td>6 micras</td><td class="qtde-destaque">868</td><td>Talher</td></tr>
+                    <tr><td>8 x 40</td><td>6 micras</td><td class="qtde-destaque">520</td><td>Alho 6</td></tr>
+                    <tr><td>9 x 40</td><td>6 micras</td><td class="qtde-destaque">462</td><td>Alho 7</td></tr>
+                    <tr><td>10 x 15</td><td>6 micras</td><td class="qtde-destaque">1.111</td><td>Canela/Cravo</td></tr>
+                    <tr><td>10 x 40</td><td>6 micras</td><td class="qtde-destaque">416</td><td>Alho 8</td></tr>
+                    <tr><td>15 x 20</td><td>6 micras</td><td class="qtde-destaque">555</td><td>Elástico</td></tr>
+                    <tr><td>15 x 30</td><td>10 micras</td><td class="qtde-destaque">222</td><td>-</td></tr>
+                    <tr><td>20 x 30</td><td>10 micras</td><td class="qtde-destaque">166</td><td>-</td></tr>
+                    <tr><td>25 x 35</td><td>10 micras</td><td class="qtde-destaque">114</td><td>-</td></tr>
+                    <tr><td>30 x 40</td><td>10 micras</td><td class="qtde-destaque">83</td><td>-</td></tr>
+                    <tr><td>40 x 60</td><td>10 micras</td><td class="qtde-destaque">41</td><td>-</td></tr>
+                    <tr><td>50 x 80</td><td>10 micras</td><td class="qtde-destaque">25</td><td>-</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ABA 2: SACOLA FEIRA                          -->
+    <!-- ============================================ -->
+    <div id="painel-feira" class="calc-panel">
+
+        <div class="calc-info">
+            <strong>Sacola Feira (espessura 4 micras):</strong> Informe a largura e a altura da sacola. A espessura padrão de 4 micras já está incluída no cálculo.
+        </div>
+
+        <div class="calc-form">
+            <div class="calc-field">
+                <label>Largura (cm)</label>
+                <input type="number" id="feira-largura" placeholder="Ex: 30" min="1" max="200" inputmode="numeric">
+            </div>
+            <div class="calc-separator">&times;</div>
+            <div class="calc-field">
+                <label>Altura (cm)</label>
+                <input type="number" id="feira-altura" placeholder="Ex: 40" min="1" max="200" inputmode="numeric">
+            </div>
+        </div>
+
+        <button class="calc-btn" onclick="calcularFeira()">Calcular</button>
+
+        <div id="resultado-feira" class="calc-result">
+            <div class="calc-result-label">Quantidade por quilo</div>
+            <div class="calc-result-value" id="feira-qtde">0</div>
+            <div class="calc-result-unit">sacolas por kg</div>
+            <div class="calc-result-detail">
+                Tamanho: <span id="feira-tamanho">-</span> |
+                Espessura: <span id="feira-esp-info">4 micras</span> |
+                Peso unitário: <span id="feira-peso">-</span>
+            </div>
+        </div>
+
+        <div class="calc-ref">
+            <h3>Tamanhos Comuns de Sacola Feira</h3>
+            <table class="calc-ref-table">
+                <thead>
+                    <tr>
+                        <th>Tamanho</th>
+                        <th>Qtde/Kg</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>18 x 30</td><td class="qtde-destaque">462</td></tr>
+                    <tr><td>20 x 30</td><td class="qtde-destaque">416</td></tr>
+                    <tr><td>20 x 40</td><td class="qtde-destaque">312</td></tr>
+                    <tr><td>25 x 35</td><td class="qtde-destaque">285</td></tr>
+                    <tr><td>30 x 40</td><td class="qtde-destaque">208</td></tr>
+                    <tr><td>35 x 45</td><td class="qtde-destaque">158</td></tr>
+                    <tr><td>60 x 80</td><td class="qtde-destaque">52</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function trocarAba(tipo) {
+    document.querySelectorAll('.calc-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.calc-panel').forEach(function(p) { p.classList.remove('active'); });
+
+    if (tipo === 'cristal') {
+        document.querySelectorAll('.calc-tab')[0].classList.add('active');
+        document.getElementById('painel-cristal').classList.add('active');
+    } else {
+        document.querySelectorAll('.calc-tab')[1].classList.add('active');
+        document.getElementById('painel-feira').classList.add('active');
+    }
+}
+
+function formatarNumero(n) {
+    return Math.floor(n).toLocaleString('pt-BR');
+}
+
+function calcularCristal() {
+    var largura = parseFloat(document.getElementById('cristal-largura').value);
+    var altura = parseFloat(document.getElementById('cristal-altura').value);
+    var espessura = parseFloat(document.getElementById('cristal-espessura').value);
+
+    if (!largura || !altura || largura <= 0 || altura <= 0) {
+        alert('Por favor, preencha a largura e a altura.');
+        return;
+    }
+
+    // Fórmula da planilha: Qtde = 1.000.000 / (Largura × Altura × Espessura)
+    var fator = largura * altura * espessura;
+    var qtdePorKg = 1000000 / fator;
+    var pesoUnitario = fator / 1000; // em gramas
+
+    document.getElementById('cristal-qtde').textContent = formatarNumero(qtdePorKg);
+    document.getElementById('cristal-tamanho').textContent = largura + ' x ' + altura + ' cm';
+    document.getElementById('cristal-esp-info').textContent = espessura + ' micras';
+    document.getElementById('cristal-peso').textContent = pesoUnitario.toFixed(2) + ' g';
+
+    var resultado = document.getElementById('resultado-cristal');
+    resultado.classList.remove('show');
+    void resultado.offsetWidth;
+    resultado.classList.add('show');
+}
+
+function calcularFeira() {
+    var largura = parseFloat(document.getElementById('feira-largura').value);
+    var altura = parseFloat(document.getElementById('feira-altura').value);
+    var espessura = 4; // Sacola feira sempre 4 micras
+
+    if (!largura || !altura || largura <= 0 || altura <= 0) {
+        alert('Por favor, preencha a largura e a altura.');
+        return;
+    }
+
+    // Mesma fórmula da planilha para sacola feira
+    var fator = largura * altura * espessura;
+    var qtdePorKg = 1000000 / fator;
+    var pesoUnitario = fator / 1000;
+
+    document.getElementById('feira-qtde').textContent = formatarNumero(qtdePorKg);
+    document.getElementById('feira-tamanho').textContent = largura + ' x ' + altura + ' cm';
+    document.getElementById('feira-esp-info').textContent = '4 micras';
+    document.getElementById('feira-peso').textContent = pesoUnitario.toFixed(2) + ' g';
+
+    var resultado = document.getElementById('resultado-feira');
+    resultado.classList.remove('show');
+    void resultado.offsetWidth;
+    resultado.classList.add('show');
+}
+
+// Permitir calcular ao pressionar Enter
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        var painelCristal = document.getElementById('painel-cristal');
+        if (painelCristal.classList.contains('active')) {
+            calcularCristal();
+        } else {
+            calcularFeira();
+        }
+    }
+});
+</script>
+
+</body>
+</html>
